@@ -1,5 +1,6 @@
 import { REACT_ELEMENT } from './constant'
 import { warpToVdom } from './utils'
+import { Component } from './Component'
 
 /**
  * 用来创建 React 元素的工厂方法
@@ -37,6 +38,7 @@ function createElement(type, config, children) {
 	}
 }
 const React = {
-	createElement
+	createElement,
+	Component
 }
 export default React
