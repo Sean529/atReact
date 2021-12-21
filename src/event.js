@@ -49,8 +49,10 @@ function createSyntheticEvent(nativeEvent) {
 		syntheticEvent[key] = value
 	}
 	syntheticEvent.nativeEvent = nativeEvent
-	syntheticEvent.isPropagationStopped = false
-	syntheticEvent.stopPropagation = stopPropagation
+	syntheticEvent.isPropagationStopped = false // 是否阻止冒泡
+	syntheticEvent.stopPropagation = stopPropagation // 阻止冒泡函数
+	syntheticEvent.defaultPrevented = false // 是否阻止默认事件
+	syntheticEvent.preventDefault = preventDefault // 阻止默认事件函数
 	return syntheticEvent
 }
 
@@ -62,4 +64,14 @@ function stopPropagation() {
 		event.cancelBubble = true // IE 阻止事件冒泡
 	}
 	this.isPropagationStopped = true
+}
+
+function preventDefault() {
+	const event = this.nativeEvent
+	if (event.preventDefault) {
+		event.preventDefault()
+	} else {
+		// IE 阻止默认事件
+
+	}
 }
