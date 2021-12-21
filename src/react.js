@@ -37,7 +37,14 @@ function createElement(type, config, children) {
 		props,
 	}
 }
+
+function createRef() {
+	return {
+		current: null
+	}
+}
 const React = {
+	createRef,
 	createElement,
 	Component
 }

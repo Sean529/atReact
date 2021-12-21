@@ -21,7 +21,7 @@ function mount(vdom, container) {
  * @returns 真实dom
  */
 function createDOM(vdom) {
-	const { type, props } = vdom
+	const { type, props, ref } = vdom
 	let dom
 	if (type === REACT_TEXT) {
 		dom = document.createTextNode(props)
@@ -47,6 +47,10 @@ function createDOM(vdom) {
 
 	// 让vdom的dom属性指向创建出来的真实dom
 	vdom.dom = dom
+
+	if (ref) {
+		ref.current = dom
+	}
 	return dom
 }
 

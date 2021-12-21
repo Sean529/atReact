@@ -3,48 +3,33 @@
 import React from './react';
 import ReactDOM from './react-dom';
 
-class Counter extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {
-      number: 0
-    }
+class Sum extends React.Component {
+  constructor() {
+    super()
+    this.a = React.createRef()
+    this.b = React.createRef()
+    this.result = React.createRef()
   }
 
   handleClick = (event) => {
-    event.stopPropagation()
-    console.log('handleButtonClick');
-    this.setState(state => ({ number: state.number + 1 }))
-    console.log(this.state.number);
-    this.setState(state => ({ number: state.number + 1 }))
-    console.log(this.state.number);
-    setTimeout(() => {
-      this.setState({
-        number: this.state.number + 1
-      })
-      console.log(this.state.number);
-      this.setState({
-        number: this.state.number + 1
-      })
-      console.log(this.state.number);
-    })
-  }
-
-  handleDivClick = () => {
-    console.log('handleDivClick');
+    const valueA = this.a.current.value
+    const valueB = this.b.current.value
+    this.result.current.value = valueA + valueB
   }
 
   render() {
     return (
       <div onClick={this.handleDivClick}>
-        <p>number: {this.state.number}</p>
+        <input ref={this.a} />
+        <input ref={this.b} />
         <button onClick={this.handleClick}>+</button>
+        <input ref={this.result} />
       </div>
     )
   }
 }
 
-const element = <Counter />
+const element = <Sum />
 
 ReactDOM.render(
   element,
