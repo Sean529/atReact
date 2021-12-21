@@ -12,6 +12,7 @@ class Counter extends React.Component {
   }
 
   handleClick = (event) => {
+    event.stopPropagation()
     console.log('handleButtonClick');
     this.setState(state => ({ number: state.number + 1 }))
     console.log(this.state.number);

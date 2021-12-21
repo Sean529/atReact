@@ -31,6 +31,9 @@ function dispatchEvent(nativeEvent) {
 		if (handler) {
 			handler(syntheticEvent)
 		}
+		if (syntheticEvent.isPropagationStopped) {
+			break
+		}
 		target = target.parentNode
 	}
 	updateQuery.batchUpdate()
@@ -46,5 +49,17 @@ function createSyntheticEvent(nativeEvent) {
 		syntheticEvent[key] = value
 	}
 	syntheticEvent.nativeEvent = nativeEvent
+	syntheticEvent.isPropagationStopped = false
+	syntheticEvent.stopPropagation = stopPropagation
 	return syntheticEvent
+}
+
+function stopPropagation() {
+	const event = this.nativeEvent
+	if (event.stopPropagation) {
+		event.stopPropagation()
+	} else {
+		event.cancelBubble = true // IE 阻止事件冒泡
+	}
+	this.isPropagationStopped = true
 }
