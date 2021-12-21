@@ -3,16 +3,31 @@
 import React from './react';
 import ReactDOM from './react-dom';
 
-class ClassComponent extends React.Component {
+class Counter extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      number: 0
+    }
+  }
+
+  handleClick = () => {
+    this.setState({ number: this.state.number + 1 })
+    console.log(this.state);
+  }
+
   render() {
-    return (<h1 className="title" style={{ color: 'red' }}>
-      <span>{this.props.name}</span>
-      <span>{this.props.children}</span>
-    </h1>)
+    return (
+      <div>
+        <p>number: {this.state.number}</p>
+        <button onClick={this.handleClick}>+</button>
+      </div>
+    )
   }
 }
 
-const element = <ClassComponent name='title'>hello</ClassComponent>
+const element = <Counter />
+
 ReactDOM.render(
   element,
   document.getElementById('root')

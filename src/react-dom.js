@@ -5,7 +5,7 @@ function render(vdom, container) {
 }
 
 /**
- * 挂载真实 dom
+ * 挂载真实dom
  * @param {object} vdom 虚拟dom
  * @param {document} container 容器
  */
@@ -17,14 +17,14 @@ function mount(vdom, container) {
 /**
  * 把虚拟dom转成真实dom
  * @param {object} vdom 虚拟dom
- * @returns 真实 dom
+ * @returns 真实dom
  */
 function createDOM(vdom) {
 	const { type, props } = vdom
 	let dom
 	if (type === REACT_TEXT) {
 		dom = document.createTextNode(props)
-	} else if(typeof type === 'function') {
+	} else if (typeof type === 'function') {
 		if (type.isReactClassComponent) {
 			return mountClassComponent(vdom)
 		} else {
@@ -44,7 +44,7 @@ function createDOM(vdom) {
 		}
 	}
 
-	// 让 vdom 的 dom 属性指向创建出来的真实 dom
+	// 让vdom的dom属性指向创建出来的真实dom
 	vdom.dom = dom
 	return dom
 }
@@ -55,8 +55,8 @@ function createDOM(vdom) {
  * @returns 真实dom
  */
 function mountFunctionComponent(vdom) {
-	// type 函数本身
-	const {type, props} = vdom
+	// type函数本身
+	const { type, props } = vdom
 	// 把属性对象传给函数执行，返回要渲染的虚拟dom
 	const renderVdom = type(props)
 	// vdom.老的要渲染的虚拟DOM = renderVdom，用于dom diff
@@ -70,9 +70,11 @@ function mountFunctionComponent(vdom) {
  * @returns 真实dom
  */
 function mountClassComponent(vdom) {
-	const {type: ClassComponent, props} = vdom
+	const { type: ClassComponent, props } = vdom
 	const classInstance = new ClassComponent(props)
 	const renderVdom = classInstance.render()
+	// 把上次render渲染得到的虚拟dom挂载
+	vdom.oldRenderVdom = classInstance.oldRenderVdom = renderVdom
 	return createDOM(renderVdom)
 }
 
@@ -102,6 +104,8 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
 			for (const attr in styleObj) {
 				dom.style[attr] = styleObj[attr]
 			}
+		} else if (/^on[A-Z].*/.test(key)) {
+			dom[key.toLowerCase()] = newProps[key]
 		} else {
 			dom[key] = newProps[key]
 		}
@@ -112,6 +116,30 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
 			dom[key] = null
 		}
 	}
+}
+
+export function findDOM(vdom) {
+	if (!vdom) return null
+	// 如果vdom上有dom属性，说明这个vdom是一个原生组件
+	if (vdom.dom) {
+		return vdom.dom // 返回它对应的真实DOM即可
+	} else {
+		// 它可能是一个函数组件或类组件
+		const oldRenderVdom = vdom.oldRenderVdom
+		return findDOM(oldRenderVdom)
+	}
+}
+
+/**
+ * 进行DOM-DIFF
+ * @param {document} parentDOM 父真实dom节点
+ * @param {object} oldVdom 老的虚拟dom
+ * @param {object} newVdom 新的虚拟dom
+ */
+export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
+	const oldDOM = findDOM(oldVdom)
+	const newDOM = createDOM(newVdom)
+	parentDOM.replaceChild(newDOM, oldDOM)
 }
 
 const ReactDOM = {
