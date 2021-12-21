@@ -24,6 +24,8 @@ function createDOM(vdom) {
 	let dom
 	if (type === REACT_TEXT) {
 		dom = document.createTextNode(props)
+	} else if(typeof type === 'function') {
+		return mountFunctionComponent(vdom)
 	} else {
 		dom = document.createElement(type)
 	}
@@ -41,6 +43,18 @@ function createDOM(vdom) {
 	// 让 vdom 的 dom 属性指向创建出来的真实 dom
 	vdom.dom = dom
 	return dom
+}
+
+/**
+ * 挂载函数组件
+ * @param {object} vdom 虚拟dom
+ * @returns 真实dom
+ */
+function mountFunctionComponent(vdom) {
+	const {type, props} = vdom
+	const renderVdom = type(props)
+	vdom.oldRenderVdom = renderVdom
+	return createDOM(renderVdom)
 }
 
 /**
