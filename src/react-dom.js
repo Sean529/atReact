@@ -1,4 +1,5 @@
 import { REACT_TEXT } from './constant'
+import { addEvent } from './event'
 
 function render(vdom, container) {
 	mount(vdom, container)
@@ -105,7 +106,8 @@ function updateProps(dom, oldProps = {}, newProps = {}) {
 				dom.style[attr] = styleObj[attr]
 			}
 		} else if (/^on[A-Z].*/.test(key)) {
-			dom[key.toLowerCase()] = newProps[key]
+			// dom[key.toLowerCase()] = newProps[key]
+			addEvent(dom, key.toLowerCase(), newProps[key])
 		} else {
 			dom[key] = newProps[key]
 		}

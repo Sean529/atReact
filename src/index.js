@@ -13,7 +13,6 @@ class Counter extends React.Component {
   }
 
   handleClick = () => {
-    updateQuery.isBatchingUpdate = true
     this.setState(state => ({ number: state.number + 1 }))
     console.log(this.state.number);
     this.setState(state => ({ number: state.number + 1 }))
@@ -28,7 +27,6 @@ class Counter extends React.Component {
       })
       console.log(this.state.number);
     })
-    updateQuery.batchUpdate()
   }
 
   render() {
