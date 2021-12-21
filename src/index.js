@@ -2,7 +2,6 @@
 // import ReactDOM from 'react-dom';
 import React from './react';
 import ReactDOM from './react-dom';
-import { updateQuery } from './Component'
 
 class Counter extends React.Component {
   constructor(props) {
@@ -12,7 +11,8 @@ class Counter extends React.Component {
     }
   }
 
-  handleClick = () => {
+  handleClick = (event) => {
+    console.log('handleButtonClick');
     this.setState(state => ({ number: state.number + 1 }))
     console.log(this.state.number);
     this.setState(state => ({ number: state.number + 1 }))
@@ -29,9 +29,13 @@ class Counter extends React.Component {
     })
   }
 
+  handleDivClick = () => {
+    console.log('handleDivClick');
+  }
+
   render() {
     return (
-      <div>
+      <div onClick={this.handleDivClick}>
         <p>number: {this.state.number}</p>
         <button onClick={this.handleClick}>+</button>
       </div>

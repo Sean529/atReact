@@ -22,13 +22,16 @@ export function addEvent(dom, eventType, handler) {
  */
 function dispatchEvent(nativeEvent) {
 	updateQuery.isBatchingUpdate = true
-	const { type, target } = nativeEvent
-	const eventType = `on${type}`
-	const syntheticEvent = createSyntheticEvent(nativeEvent)
-	const { _store } = target
-	const handler = _store && _store[eventType]
-	if (handler) {
-		handler(syntheticEvent)
+	let { type, target } = nativeEvent
+	while(target) {
+		const eventType = `on${type}`
+		const syntheticEvent = createSyntheticEvent(nativeEvent)
+		const { _store } = target
+		const handler = _store && _store[eventType]
+		if (handler) {
+			handler(syntheticEvent)
+		}
+		target = target.parentNode
 	}
 	updateQuery.batchUpdate()
 }
