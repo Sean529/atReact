@@ -51,8 +51,11 @@ function createDOM(vdom) {
  * @returns 真实dom
  */
 function mountFunctionComponent(vdom) {
+	// type 函数本身
 	const {type, props} = vdom
+	// 把属性对象传给函数执行，返回要渲染的虚拟dom
 	const renderVdom = type(props)
+	// vdom.老的要渲染的虚拟DOM = renderVdom，用于dom diff
 	vdom.oldRenderVdom = renderVdom
 	return createDOM(renderVdom)
 }
