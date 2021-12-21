@@ -2,26 +2,43 @@ import { findDOM, compareTwoVdom } from './react-dom'
 
 class Updater {
 	constructor(classInstance) {
+		// 类组件的实例
 		this.classInstance = classInstance;
+		// 等待更新的状态
 		this.pendingState = []
+		// 更新后的回调
+		this.callbacks = []
 	}
-	addState(partialState) {
+	addState(partialState, callback) {
 		this.pendingState.push(partialState)
+		// 接收函数更新state
+		if (typeof callback === 'function') {
+			this.callbacks.push(callback)
+		}
 		this.emitUpdate()
 	}
 	emitUpdate() {
 		this.updateComponent()
 	}
 	updateComponent() {
-		const { classInstance, pendingState } = this
+		const { classInstance, pendingState, callbacks } = this
 		if (pendingState.length) {
 			shouldUpdate(classInstance, this.getState())
+		}
+		// 回调执行
+		if (callbacks.length) {
+			callbacks.forEach(callback => callback())
+			callbacks.length = 0
 		}
 	}
 	getState() {
 		const { classInstance, pendingState } = this
 		let { state } = classInstance
 		pendingState.forEach(partialState => {
+			// 如果是函数则返回函数执行后的结果
+			if (typeof partialState === 'function') {
+				partialState = partialState(state)
+			}
 			state = { ...state, ...partialState }
 		})
 		pendingState.length = 0
@@ -41,8 +58,8 @@ export class Component {
 		this.state = {}
 		this.updater = new Updater(this)
 	}
-	setState(partialState) {
-		this.updater.addState(partialState)
+	setState(partialState, callback) {
+		this.updater.addState(partialState, callback)
 	}
 	forceUpdate() {
 		// 获取此组件上一次 render 渲染出来的虚拟 DOM
