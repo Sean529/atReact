@@ -2,6 +2,7 @@
 // import ReactDOM from 'react-dom';
 import React from './react';
 import ReactDOM from './react-dom';
+import { updateQuery } from './Component'
 
 class Counter extends React.Component {
   constructor(props) {
@@ -12,14 +13,22 @@ class Counter extends React.Component {
   }
 
   handleClick = () => {
-    // this.setState({ number: this.state.number + 1 }, () => {
-    //   console.log(this.state);
-    // })
-    this.setState((state) => ({
-      number: state.number + 1
-    }), () => {
-      console.log(this.state);
+    updateQuery.isBatchingUpdate = true
+    this.setState(state => ({ number: state.number + 1 }))
+    console.log(this.state.number);
+    this.setState(state => ({ number: state.number + 1 }))
+    console.log(this.state.number);
+    setTimeout(() => {
+      this.setState({
+        number: this.state.number + 1
+      })
+      console.log(this.state.number);
+      this.setState({
+        number: this.state.number + 1
+      })
+      console.log(this.state.number);
     })
+    updateQuery.batchUpdate()
   }
 
   render() {
