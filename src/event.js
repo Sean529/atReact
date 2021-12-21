@@ -72,6 +72,7 @@ function preventDefault() {
 		event.preventDefault()
 	} else {
 		// IE 阻止默认事件
-
+		event.returnValue = false
 	}
+	this.defaultPrevented = true
 }
