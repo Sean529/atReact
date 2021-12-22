@@ -3,33 +3,42 @@
 import React from './react';
 import ReactDOM from './react-dom';
 
-class Sum extends React.Component {
+class Form extends React.Component {
   constructor() {
     super()
-    this.a = React.createRef()
-    this.b = React.createRef()
-    this.result = React.createRef()
+    this.textInputRef = React.createRef()
   }
 
-  handleClick = (event) => {
-    const valueA = this.a.current.value
-    const valueB = this.b.current.value
-    this.result.current.value = valueA + valueB
+  handler = () => {
+    this.textInputRef.current.getFocus()
   }
 
   render() {
     return (
-      <div onClick={this.handleDivClick}>
-        <input ref={this.a} />
-        <input ref={this.b} />
-        <button onClick={this.handleClick}>+</button>
-        <input ref={this.result} />
+      <div>
+        <TextInput ref={this.textInputRef} />
+        <button onClick={this.handler}>获取焦点</button>
       </div>
     )
   }
 }
 
-const element = <Sum />
+class TextInput extends React.Component {
+  constructor() {
+    super()
+    this.inputRef = React.createRef()
+  }
+  getFocus = () => {
+    this.inputRef.current.focus()
+  }
+  render() {
+    return (
+      <input ref={this.inputRef}/>
+    )
+  }
+}
+
+const element = <Form />
 
 ReactDOM.render(
   element,

@@ -75,8 +75,12 @@ function mountFunctionComponent(vdom) {
  * @returns 真实dom
  */
 function mountClassComponent(vdom) {
-	const { type: ClassComponent, props } = vdom
+	const { type: ClassComponent, props, ref } = vdom
 	const classInstance = new ClassComponent(props)
+	// 让 ref.current 指向类组件的实例
+	if (ref) {
+		ref.current = classInstance
+	}
 	const renderVdom = classInstance.render()
 	// 把上次render渲染得到的虚拟dom挂载
 	vdom.oldRenderVdom = classInstance.oldRenderVdom = renderVdom
