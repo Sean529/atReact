@@ -1,4 +1,4 @@
-import { REACT_TEXT } from './constant'
+import { REACT_TEXT, REACT_FORWARD_REF } from './constant'
 import { addEvent } from './event'
 
 function render(vdom, container) {
@@ -23,7 +23,9 @@ function mount(vdom, container) {
 function createDOM(vdom) {
 	const { type, props, ref } = vdom
 	let dom
-	if (type === REACT_TEXT) {
+	if (type && type.$$typeof === REACT_FORWARD_REF) {
+		return mountForwardComponent(vdom)
+	} else if (type === REACT_TEXT) {
 		dom = document.createTextNode(props)
 	} else if (typeof type === 'function') {
 		if (type.isReactClassComponent) {
@@ -52,6 +54,13 @@ function createDOM(vdom) {
 		ref.current = dom
 	}
 	return dom
+}
+
+function mountForwardComponent(vdom) {
+	const { type, props, ref } = vdom 
+	const renderVdom = type.render(props, ref)
+	vdom.oldRenderVdom = renderVdom
+	return createDOM(renderVdom)
 }
 
 /**
