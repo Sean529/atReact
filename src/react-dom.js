@@ -92,6 +92,7 @@ function mountFunctionComponent(vdom) {
 function mountClassComponent(vdom) {
 	const { type: ClassComponent, props, ref } = vdom
 	const classInstance = new ClassComponent(props)
+	vdom.classInstance = classInstance
 	// 让 ref.current 指向类组件的实例
 	if (ref) {
 		ref.current = classInstance
@@ -102,7 +103,7 @@ function mountClassComponent(vdom) {
 	}
 	const renderVdom = classInstance.render()
 	// 把上次render渲染得到的虚拟dom挂载
-	vdom.oldRenderVdom = classInstance.oldRenderVdom = renderVdom
+	classInstance.oldRenderVdom = renderVdom
 	const dom = createDOM(renderVdom)
 	// dom 上挂个声明周期函数，在渲染完成后触发该函数
 	if (classInstance.componentDidMount) {
@@ -159,8 +160,8 @@ export function findDOM(vdom) {
 		return vdom.dom // 返回它对应的真实DOM即可
 	} else {
 		// 它可能是一个函数组件或类组件
-		const oldRenderVdom = vdom.oldRenderVdom
-		return findDOM(oldRenderVdom)
+		const renderVdom = vdom.classInstance ? vdom.classInstance.oldRenderVdom : vdom.oldRenderVdom
+		return findDOM(renderVdom)
 	}
 }
 
@@ -171,9 +172,58 @@ export function findDOM(vdom) {
  * @param {object} newVdom 新的虚拟dom
  */
 export function compareTwoVdom(parentDOM, oldVdom, newVdom) {
-	const oldDOM = findDOM(oldVdom)
-	const newDOM = createDOM(newVdom)
-	parentDOM.replaceChild(newDOM, oldDOM)
+	if (!oldVdom && !newVdom) {
+		return
+	} else if (oldVdom && !newVdom) {
+		unMountVdom(oldVdom)
+	} else if (!oldVdom && newVdom) {
+		didMountVdom(parentDOM, newVdom)
+	} else if (oldVdom && newVdom && oldVdom.type !== newVdom.type) {
+		unMountVdom(oldVdom)
+		didMountVdom(parentDOM, newVdom)
+	} else {
+		updateElement(oldVdom, newVdom)
+	}
+}
+
+/**
+ * 深度比较新老dom差异，把差异同步到真实dom
+ * @param {object} oldVdom 老的虚拟dom
+ * @param {object} newVdom 新的虚拟dom
+ */
+function updateElement(oldVdom, newVdom) {
+	console.log('%c AT-[ oldVdom ]-190', 'font-size:13px; background:#de4307; color:#f6d04d;', oldVdom)
+	console.log('%c AT-[ newVdom ]-190', 'font-size:13px; background:#de4307; color:#f6d04d;', newVdom)
+}
+
+function didMountVdom(parentDOM, vdom) {
+	const newDOM = createDOM(vdom)
+	parentDOM.appendChild(newDOM)
+	if (newDOM.componentDidMount) {
+		newDOM.componentDidMount()
+	}
+}
+
+function unMountVdom(vdom) {
+	const { props, ref } = vdom
+	// 获取当前真实DOM
+	const currentDOM = findDOM(vdom)
+	// 如果 vdom 上有 classInstance 说明是类组件
+	if (vdom.classInstance && vdom.classInstance.componentWillUnmount) {
+		// 执行类组件卸载声明周期
+		vdom.classInstance.componentWillUnmount()
+	}
+	if (ref) {
+		ref.current = null
+	}
+	if (props.children) {
+		const children = Array.isArray(props.children) ? props.children : [props.children]
+		children.forEach(unMountVdom)
+	}
+	// 把此虚拟DOM对应的老的DOM节点从父节点中移除
+	if (currentDOM) {
+		currentDOM.parentDOM.removeChild(currentDOM)
+	}
 }
 
 const ReactDOM = {
