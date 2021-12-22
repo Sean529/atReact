@@ -12,7 +12,13 @@ function render(vdom, container) {
  */
 function mount(vdom, container) {
 	const dom = createDOM(vdom)
-	container.appendChild(dom)
+	if (dom) {
+		container.appendChild(dom)
+		// dom 渲染完成后触发声明周期
+		if (dom.componentDidMount) {
+			dom.componentDidMount()
+		}
+	}
 }
 
 /**
@@ -57,7 +63,7 @@ function createDOM(vdom) {
 }
 
 function mountForwardComponent(vdom) {
-	const { type, props, ref } = vdom 
+	const { type, props, ref } = vdom
 	const renderVdom = type.render(props, ref)
 	vdom.oldRenderVdom = renderVdom
 	return createDOM(renderVdom)
@@ -90,10 +96,19 @@ function mountClassComponent(vdom) {
 	if (ref) {
 		ref.current = classInstance
 	}
+	// dom挂载前触发生命周期
+	if (classInstance.componentWillMount) {
+		classInstance.componentWillMount()
+	}
 	const renderVdom = classInstance.render()
 	// 把上次render渲染得到的虚拟dom挂载
 	vdom.oldRenderVdom = classInstance.oldRenderVdom = renderVdom
-	return createDOM(renderVdom)
+	const dom = createDOM(renderVdom)
+	// dom 上挂个声明周期函数，在渲染完成后触发该函数
+	if (classInstance.componentDidMount) {
+		dom.componentDidMount = classInstance.componentDidMount.bind(this)
+	}
+	return dom
 }
 
 /**

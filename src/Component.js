@@ -65,8 +65,20 @@ class Updater {
 }
 
 function shouldUpdate(classInstance, nextState) {
+	let willUpdate = true
+	// 是否更新组件生命周期
+	if (classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(null, nextState)) {
+		willUpdate = false
+	}
+	// 更新前触发声明周期
+	if (willUpdate && classInstance.componentWillUpdate) {
+		classInstance.componentWillUpdate()
+	}
+	// 不管页面是否要更新，state 都会更新
 	classInstance.state = nextState
-	classInstance.forceUpdate()
+	if (willUpdate) {
+		classInstance.forceUpdate()
+	}
 }
 
 export class Component {
@@ -89,5 +101,9 @@ export class Component {
 		// 把老的虚拟 DOM 和新的虚拟 DOM 进行对比，对比得到的差异更新到真实 DOM 上
 		compareTwoVdom(oldDOM.parentNode, oldRenderVdom, newRenderVdom)
 		this.oldRenderVdom = newRenderVdom
+		// 组件更新后触发声明周期
+		if (this.componentDidUpdate) {
+			this.componentDidUpdate(this.props, this.state)
+		}
 	}
 }
