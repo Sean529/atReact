@@ -30,7 +30,8 @@ class Updater {
 		}
 		this.emitUpdate()
 	}
-	emitUpdate() {
+	emitUpdate(nextProps) {
+		this.nextProps = nextProps
 		// 如果批量更新只需要把updater添加到队列中
 		if (updateQuery.isBatchingUpdate) {
 			updateQuery.updaters.add(this)
@@ -39,9 +40,10 @@ class Updater {
 		}
 	}
 	updateComponent() {
-		const { classInstance, pendingState, callbacks } = this
-		if (pendingState.length) {
-			shouldUpdate(classInstance, this.getState())
+		const { classInstance, pendingState, nextProps, callbacks } = this
+		// 如果有props也走shouldUpdate
+		if (nextProps || pendingState.length) {
+			shouldUpdate(classInstance, nextProps, this.getState())
 		}
 		// 回调执行
 		if (callbacks.length) {
@@ -64,10 +66,10 @@ class Updater {
 	}
 }
 
-function shouldUpdate(classInstance, nextState) {
+function shouldUpdate(classInstance, nextProps, nextState) {
 	let willUpdate = true
 	// 是否更新组件生命周期
-	if (classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(null, nextState)) {
+	if (classInstance.shouldComponentUpdate && !classInstance.shouldComponentUpdate(nextProps, nextState)) {
 		willUpdate = false
 	}
 	// 更新前触发声明周期
@@ -76,6 +78,10 @@ function shouldUpdate(classInstance, nextState) {
 	}
 	// 不管页面是否要更新，state 都会更新
 	classInstance.state = nextState
+	// 将props挂到实例上
+	if (nextProps) {
+		classInstance.props = nextProps
+	}
 	if (willUpdate) {
 		classInstance.forceUpdate()
 	}
@@ -94,6 +100,7 @@ export class Component {
 	forceUpdate() {
 		// 获取此组件上一次 render 渲染出来的虚拟 DOM
 		const oldRenderVdom = this.oldRenderVdom
+		console.log('%c AT-[ oldRenderVdom ]-103', 'font-size:13px; background:#de4307; color:#f6d04d;', oldRenderVdom)
 		// 获取虚拟 DOM 对应的真实 DOM oldRenderVdom.dom 
 		const oldDOM = findDOM(oldRenderVdom)
 		// 重新执行 render 得到新的虚拟 DOM

@@ -46,10 +46,10 @@ class Counter extends React.Component {
   }
 
   render() {
-    console.log('Counter 3 .render');
+    console.log('Counter 3. render');
     return (
       <div>
-        {this.state.number}
+        <p>{this.state.number}</p>
         {this.state.number === 4 ? null : <ChildCounter count={this.state.number} />}
         <button onClick={this.handlerClick}>+</button>
       </div>
@@ -70,8 +70,8 @@ class ChildCounter extends React.Component {
     console.log('ChildCounter 4. componentDidMount');
   }
 
-  componentReceiveProps() {
-    console.log('ChildCounter 5. componentReceiveProps');
+  componentWillReceiveProps(nextProps) {
+    console.log('ChildCounter 5. componentWillReceiveProps', nextProps);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
