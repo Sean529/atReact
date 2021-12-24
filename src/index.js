@@ -80,7 +80,15 @@ class ChildCounter extends React.Component {
   }
 
   componentWillUnmount() {
-    console.log('ChildCounter 7. componentWillUnmount');
+    console.log('ChildCounter 9. componentWillUnmount');
+  }
+
+  componentWillUpdate() {
+    console.log('Counter 7. componentWillUpdate')
+  }
+
+  componentDidUpdate() {
+    console.log('Counter 8. componentDidUpdate');
   }
 
   render() {

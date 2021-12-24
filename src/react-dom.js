@@ -272,7 +272,6 @@ function unMountVdom(vdom) {
 		children.forEach(unMountVdom)
 	}
 	// 把此虚拟DOM对应的老的DOM节点从父节点中移除
-	console.log('%c AT-[ currentDOM.parentNode ]-278', 'font-size:13px; background:#de4307; color:#f6d04d;', currentDOM.parentNode)
 	if (currentDOM) {
 		currentDOM.parentNode.removeChild(currentDOM)
 	}

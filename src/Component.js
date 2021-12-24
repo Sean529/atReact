@@ -5,10 +5,10 @@ export const updateQuery = {
 	isBatchingUpdate: false, // 是否要执行批量更新
 	updaters: new Set(), // updater 实例的集合
 	batchUpdate() {
+		updateQuery.isBatchingUpdate = false
 		for (const updater of updateQuery.updaters) {
 			updater.updateComponent()
 		}
-		updateQuery.isBatchingUpdate = false
 		updateQuery.updaters.clear()
 	}
 }
@@ -100,7 +100,6 @@ export class Component {
 	forceUpdate() {
 		// 获取此组件上一次 render 渲染出来的虚拟 DOM
 		const oldRenderVdom = this.oldRenderVdom
-		console.log('%c AT-[ oldRenderVdom ]-103', 'font-size:13px; background:#de4307; color:#f6d04d;', oldRenderVdom)
 		// 获取虚拟 DOM 对应的真实 DOM oldRenderVdom.dom 
 		const oldDOM = findDOM(oldRenderVdom)
 		// 重新执行 render 得到新的虚拟 DOM
