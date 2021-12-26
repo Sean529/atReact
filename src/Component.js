@@ -102,6 +102,12 @@ export class Component {
 		const oldRenderVdom = this.oldRenderVdom
 		// 获取虚拟 DOM 对应的真实 DOM oldRenderVdom.dom 
 		const oldDOM = findDOM(oldRenderVdom)
+		if (this.constructor.getDerivedStateFromProps) {
+			const newState = this.constructor.getDerivedStateFromProps(this.props, this.state)
+			if (newState) {
+				this.state = { ...this.state, ...newState }
+			}
+		}
 		// 重新执行 render 得到新的虚拟 DOM
 		const newRenderVdom = this.render()
 		// 把老的虚拟 DOM 和新的虚拟 DOM 进行对比，对比得到的差异更新到真实 DOM 上

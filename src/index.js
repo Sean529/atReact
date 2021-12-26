@@ -1,38 +1,59 @@
-// import React from "react"
-// import ReactDOM from "react-dom"
-import React from './react';
-import ReactDOM from './react-dom';
+import React from "react"
+import ReactDOM from "react-dom"
+// import React from "./react"
+// import ReactDOM from "./react-dom"
 
 class Counter extends React.Component {
+  static defaultProps = {
+    name: "at",
+  }
+
   constructor(props) {
     super(props)
     this.state = {
-      list: [
-        ["A", "B"],
-        ["C", "D"],
-        ["E", "F"],
-      ],
+      number: 0,
     }
   }
-
   handlerClick = () => {
     this.setState({
-      list: ["A", "C", "E", "B", "G"],
+      number: this.state.number + 1,
     })
   }
-
   render() {
     return (
       <div>
-        <ul>
-          {React.Children.map(this.state.list, (item) => (
-            <li key={item}>{item}</li>
-          ))}
-          {/* {this.state.list.map(item => <li key={item}>{item}</li>)} */}
-        </ul>
+        <p>{this.state.number}</p>
+        <ChildCounter count={this.state.number} />
         <button onClick={this.handlerClick}>+</button>
       </div>
     )
+  }
+}
+
+class ChildCounter extends React.Component {
+  constructor() {
+    super()
+    this.state = {
+      number: 0,
+    }
+  }
+  // 当子组件接收到新属性时会触发
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { count } = nextProps
+    if (count % 2 === 0) {
+      return {
+        number: count * 2,
+      }
+    } else if (count % 3 === 0) {
+      return {
+        number: count * 3,
+      }
+    }
+    return null
+  }
+
+  render() {
+    return <div>{this.state.number}</div>
   }
 }
 
