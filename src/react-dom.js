@@ -1,4 +1,4 @@
-import { REACT_TEXT, REACT_FORWARD_REF } from './constant'
+import { REACT_TEXT, REACT_FORWARD_REF, PLACEMENT, MOVE } from './constant'
 import { addEvent } from './event'
 
 function render(vdom, container) {
@@ -47,6 +47,7 @@ function createDOM(vdom) {
 		updateProps(dom, null, props)
 		const { children } = props
 		if (typeof children === 'object' && children.type) {
+			children.mountIndex = 0
 			mount(children, dom)
 		} else if (Array.isArray(children)) {
 			reconcileChildren(children, dom)
@@ -118,8 +119,9 @@ function mountClassComponent(vdom) {
  * @param {document} parentDOM 父元素
  */
 function reconcileChildren(children, parentDOM) {
-	children.forEach(vdom => {
-		mount(vdom, parentDOM)
+	children.forEach((child, index) => {
+		child.mountIndex = index
+		mount(child, parentDOM)
 	})
 }
 
@@ -235,11 +237,67 @@ function updateFunctionComponent(oldVdom, newVdom) {
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
 	oldVChildren = (Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren])
 	newVChildren = (Array.isArray(newVChildren) ? newVChildren : [newVChildren])
-	const maxLength = Math.max(oldVChildren.length, newVChildren.length)
 
-	for (let i = 0; i < maxLength; i++) {
-		const nextVdom = oldVChildren.find((item, index) => index > i && item && findDOM(item))
-		compareTwoVdom(parentDOM, oldVChildren[i], newVChildren[i], nextVdom && findDOM(nextVdom))
+	// 把老节点存放入到一个以key为属性，以节点为值的对象中
+	const keyedOldMap = {}
+	let lastPlacedIndex = 0
+	oldVChildren.forEach((oldVChild, index) => {
+		keyedOldMap[oldVChild.key || index] = oldVChild
+	})
+
+	let patch = []
+	newVChildren.forEach((newVChild, index) => {
+		const newKey = newVChild.key || index
+		const oldVChild = keyedOldMap[newKey]
+		if (oldVChild) {
+			// 更新老节点
+			updateElement(oldVChild, newVChild)
+			if (oldVChild.mountIndex < lastPlacedIndex) {
+				patch.push({
+					type: MOVE,
+					oldVChild,
+					newVChild,
+					mountIndex: index
+				})
+			}
+			delete keyedOldMap[newKey]
+			lastPlacedIndex = Math.max(lastPlacedIndex, oldVChild.mountIndex)
+		} else {
+			patch.push({
+				type: PLACEMENT,
+				oldVChild,
+				newVChild,
+				mountIndex: index
+			})
+		}
+	})
+
+	// 获取所有的要移动的老节点
+	const moveChild = patch.filter(action => action.type === MOVE).map(action => action.oldVChild)
+	// 把剩下的没有复用到的老节点和要移动的节点全部从DOM树中删除
+	const deleteVChildren = Object.values(keyedOldMap)
+	deleteVChildren.concat(moveChild).forEach(oldVChild => {
+		const currentChild = findDOM(oldVChild)
+		parentDOM.removeChild(currentChild)
+	})
+
+	if (patch.length) {
+		patch.forEach(action => {
+			const { type, oldVChild, newVChild, mountIndex } = action
+			const childNodes = parentDOM.childNodes
+			let currentDOM
+			if (type === PLACEMENT) {
+				currentDOM = createDOM(newVChild)
+			} else if (type === MOVE) {
+				currentDOM = findDOM(oldVChild)
+			}
+			const childNode = childNodes[mountIndex]
+			if (childNode) {
+				parentDOM.insertBefore(currentDOM, childNode)
+			} else {
+				parentDOM.appendChild(currentDOM)
+			}
+		})
 	}
 }
 
