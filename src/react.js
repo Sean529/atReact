@@ -1,4 +1,4 @@
-import { REACT_ELEMENT, REACT_FORWARD_REF } from "./constant"
+import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER } from "./constant"
 import { warpToVdom } from "./utils"
 import { Component } from "./Component"
 
@@ -59,12 +59,26 @@ const Children = {
   },
 }
 
+function createContext () {
+  const context = { $$typeof: REACT_CONTEXT, }
+  context.Provider = {
+    $$typeof: REACT_PROVIDER,
+    _context: context
+  }
+  context.Consumer = {
+    $$typeof: REACT_CONTEXT,
+    _context: context
+  }
+  return context
+}
+
 const React = {
   createRef,
   createElement,
   Component,
   forwardRef,
   Children,
+  createContext,
 }
 
 export default React

@@ -3,61 +3,80 @@
 import React from "./react"
 import ReactDOM from "./react-dom"
 
-class ScrollList extends React.Component {
+const ThemeContext = React.createContext()
+const { Provider, Consumer } = ThemeContext
+const style = { margin: '10px', padding: '5px', }
+function Title() {
+  return (
+    <Consumer>
+      {
+        (contentValue) => (
+          <div style={{ ...style, border: `5px solid ${contentValue.color}` }}>
+            Title
+          </div>
+        )
+      }
+    </Consumer>
+  )
+}
+class Head extends React.Component {
+  static contextType = ThemeContext
+  render() {
+    return (
+      <div style={{ ...style, border: `5px solid ${this.context.color}` }}>
+        Head
+        <Title />
+      </div>)
+  }
+}
+function Content() {
+  return (
+    <Consumer>
+      {
+        (contextValue) => (
+          <div style={{ ...style, border: `5px solid ${contextValue.color}` }}>
+            Content
+            <button onClick={() => contextValue.changeColor('red')}>变红</button>
+            <button onClick={() => contextValue.changeColor('green')}>变绿</button>
+          </div>
+        )
+      }
+    </Consumer>
+  )
+}
+class Main extends React.Component {
+  static contextType = ThemeContext
+  render() {
+    return (
+      <div style={{ ...style, border: `5px solid ${this.context.color}` }}>
+        Main
+        <Content />
+      </div>)
+  }
+}
+class Page extends React.Component {
   constructor(props) {
     super(props)
-    this.state = {
-      message: [],
-    }
-    this.wrapper = React.createRef()
+    this.state = { color: 'red' }
   }
 
-  addMessage = () => {
-    this.setState({
-      message: [`${this.state.message.length}`, ...this.state.message]
-    })
-  }
-
-  componentDidMount() {
-    setInterval(() => {
-      this.addMessage()
-    }, 1000)
-  }
-
-  componentWillUnmount() {
-    clearInterval(this.timer)
-  }
-
-  getSnapshotBeforeUpdate() {
-    return {
-      prevScrollTop: this.wrapper.current.scrollTop,
-      prevScrollHeight: this.wrapper.current.scrollHeight
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState, { prevScrollTop, prevScrollHeight }) {
-    this.wrapper.current.scrollTop = prevScrollTop + (this.wrapper.current.scrollHeight - prevScrollHeight)
+  changeColor = (color) => {
+    this.setState({ color })
   }
 
   render() {
-    const style = {
-      width: '200px',
-      height: '100px',
-      border: '1px solid red',
-      overflow: 'auto',
-    }
+    const contextValue = { color: this.state.color, changeColor: this.changeColor }
     return (
-      <div style={style} ref={this.wrapper}>
-        {
-          this.state.message.map((message, index) => {
-            return <div key={index}>{message}</div>
-          })
-        }
-      </div>
+      <Provider value={contextValue}>
+        <div style={{ ...style, width: '250px' }}>
+          <Head />
+          <Main />
+        </div>
+      </Provider >
     )
   }
 }
 
-const element = <ScrollList />
+const element = <Page />
 
 ReactDOM.render(element, document.getElementById("root"))
