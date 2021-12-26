@@ -1,62 +1,63 @@
-import React from "react"
-import ReactDOM from "react-dom"
-// import React from "./react"
-// import ReactDOM from "./react-dom"
+// import React from "react"
+// import ReactDOM from "react-dom"
+import React from "./react"
+import ReactDOM from "./react-dom"
 
-class Counter extends React.Component {
-  static defaultProps = {
-    name: "at",
-  }
-
+class ScrollList extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
-      number: 0,
+      message: [],
     }
+    this.wrapper = React.createRef()
   }
-  handlerClick = () => {
+
+  addMessage = () => {
     this.setState({
-      number: this.state.number + 1,
+      message: [`${this.state.message.length}`, ...this.state.message]
     })
   }
+
+  componentDidMount() {
+    setInterval(() => {
+      this.addMessage()
+    }, 1000)
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.timer)
+  }
+
+  getSnapshotBeforeUpdate() {
+    return {
+      prevScrollTop: this.wrapper.current.scrollTop,
+      prevScrollHeight: this.wrapper.current.scrollHeight
+    }
+  }
+
+  componentDidUpdate(prevProps, prevState, { prevScrollTop, prevScrollHeight }) {
+    this.wrapper.current.scrollTop = prevScrollTop + (this.wrapper.current.scrollHeight - prevScrollHeight)
+  }
+
   render() {
+    const style = {
+      width: '200px',
+      height: '100px',
+      border: '1px solid red',
+      overflow: 'auto',
+    }
     return (
-      <div>
-        <p>{this.state.number}</p>
-        <ChildCounter count={this.state.number} />
-        <button onClick={this.handlerClick}>+</button>
+      <div style={style} ref={this.wrapper}>
+        {
+          this.state.message.map((message, index) => {
+            return <div key={index}>{message}</div>
+          })
+        }
       </div>
     )
   }
 }
 
-class ChildCounter extends React.Component {
-  constructor() {
-    super()
-    this.state = {
-      number: 0,
-    }
-  }
-  // 当子组件接收到新属性时会触发
-  static getDerivedStateFromProps(nextProps, prevState) {
-    const { count } = nextProps
-    if (count % 2 === 0) {
-      return {
-        number: count * 2,
-      }
-    } else if (count % 3 === 0) {
-      return {
-        number: count * 3,
-      }
-    }
-    return null
-  }
-
-  render() {
-    return <div>{this.state.number}</div>
-  }
-}
-
-const element = <Counter />
+const element = <ScrollList />
 
 ReactDOM.render(element, document.getElementById("root"))

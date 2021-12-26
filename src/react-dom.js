@@ -108,7 +108,7 @@ function mountClassComponent(vdom) {
 	const dom = createDOM(renderVdom)
 	// dom 上挂个声明周期函数，在渲染完成后触发该函数
 	if (classInstance.componentDidMount) {
-		dom.componentDidMount = classInstance.componentDidMount.bind(this)
+		dom.componentDidMount = classInstance.componentDidMount.bind(classInstance)
 	}
 	return dom
 }

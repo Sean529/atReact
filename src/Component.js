@@ -108,6 +108,7 @@ export class Component {
 				this.state = { ...this.state, ...newState }
 			}
 		}
+		const snapshot = this.getSnapshotBeforeUpdate && this.getSnapshotBeforeUpdate()
 		// 重新执行 render 得到新的虚拟 DOM
 		const newRenderVdom = this.render()
 		// 把老的虚拟 DOM 和新的虚拟 DOM 进行对比，对比得到的差异更新到真实 DOM 上
@@ -115,7 +116,7 @@ export class Component {
 		this.oldRenderVdom = newRenderVdom
 		// 组件更新后触发声明周期
 		if (this.componentDidUpdate) {
-			this.componentDidUpdate(this.props, this.state)
+			this.componentDidUpdate(this.props, this.state, snapshot)
 		}
 	}
 }
