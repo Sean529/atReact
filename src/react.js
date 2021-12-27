@@ -1,5 +1,5 @@
-import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER } from "./constant"
-import { wrapToVdom } from "./utils"
+import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from "./constant"
+import { wrapToVdom, shallowEqual } from "./utils"
 import { Component, PureComponent } from "./Component"
 
 /**
@@ -91,6 +91,14 @@ function cloneElement(element, newProps, ...newChildren) {
   return { ...element, props }
 }
 
+function memo(type, compare = shallowEqual) {
+  return {
+    $$typeof: REACT_MEMO,
+    compare,
+    type
+  }
+}
+
 const React = {
   createRef,
   createElement,
@@ -100,6 +108,7 @@ const React = {
   createContext,
   cloneElement,
   PureComponent,
+  memo,
 }
 
 export default React

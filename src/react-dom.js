@@ -1,4 +1,4 @@
-import { REACT_TEXT, REACT_FORWARD_REF, PLACEMENT, MOVE, REACT_CONTEXT, REACT_PROVIDER } from './constant'
+import { REACT_TEXT, REACT_FORWARD_REF, PLACEMENT, MOVE, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from './constant'
 import { addEvent } from './event'
 
 function render(vdom, container) {
@@ -29,7 +29,9 @@ function mount(vdom, container) {
 function createDOM(vdom) {
 	const { type, props, ref } = vdom
 	let dom
-	if (type && type.$$typeof === REACT_FORWARD_REF) {
+	if (type && type.$$typeof === REACT_MEMO) {
+		return mountMemoComponent(vdom)
+	} else if (type && type.$$typeof === REACT_FORWARD_REF) {
 		return mountForwardComponent(vdom)
 	} else if (type && type.$$typeof === REACT_PROVIDER) { // Provider
 		return mountProviderComponent(vdom)
@@ -65,6 +67,17 @@ function createDOM(vdom) {
 		ref.current = dom
 	}
 	return dom
+}
+
+function mountMemoComponent(vdom) {
+	// type函数本身
+	const { type: { type: FunctionComponent }, props } = vdom
+	// 把属性对象传给函数执行，返回要渲染的虚拟dom
+	const renderVdom = FunctionComponent(props)
+	vdom.preProps = props
+	// vdom.老的要渲染的虚拟DOM = renderVdom，用于dom diff
+	vdom.oldRenderVdom = renderVdom
+	return createDOM(renderVdom)
 }
 
 function mountProviderComponent(vdom) {
@@ -218,7 +231,9 @@ export function compareTwoVdom(parentDOM, oldVdom, newVdom, nextDOM) {
  * @param {object} newVdom 新的虚拟dom
  */
 function updateElement(oldVdom, newVdom) {
-	if (oldVdom.type.$$typeof === REACT_CONTEXT) {
+	if (oldVdom.type.$$typeof === REACT_MEMO) {
+		updateMemoComponent(oldVdom, newVdom)
+	} else if (oldVdom.type.$$typeof === REACT_CONTEXT) {
 		updateContextComponent(oldVdom, newVdom)
 	} else if (oldVdom.type.$$typeof === REACT_PROVIDER) {
 		updateProviderComponent(oldVdom, newVdom)
@@ -238,6 +253,23 @@ function updateElement(oldVdom, newVdom) {
 		} else {
 			updateFunctionComponent(oldVdom, newVdom)
 		}
+	}
+}
+
+function updateMemoComponent(oldVdom, newVdom) {
+	const { type: { compare }, prevProps, } = oldVdom
+	if (!compare(prevProps, newVdom.props)) {
+		const currentDOM = findDOM(oldVdom)
+		if (!currentDOM) return
+		const parentDOM = currentDOM.parentNode
+		const { type: { type: FunctionComponent }, props } = newVdom
+		const newRenderVdom = FunctionComponent(props)
+		compareTwoVdom(parentDOM, oldVdom.oldRenderVdom, newRenderVdom)
+		newVdom.prevProps = props
+		newVdom.oldRenderVdom = newRenderVdom
+	} else {
+		newVdom.prevProps = prevProps
+		newVdom.oldRenderProps = oldVdom.oldRenderVdom
 	}
 }
 

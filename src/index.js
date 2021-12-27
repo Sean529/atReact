@@ -15,6 +15,8 @@ function FunctionCounter(props) {
   return <div>FunctionCounter: {props.counter}</div>
 }
 
+const MemoFunctionCounter = React.memo(FunctionCounter)
+
 class App extends React.Component {
   constructor() {
     super()
@@ -30,7 +32,7 @@ class App extends React.Component {
       <div>
         <p>{this.state.number}</p>
         <ClassCounter counter={this.state.number} />
-        <FunctionCounter counter={this.state.number} />
+        <MemoFunctionCounter counter={this.state.number} />
         <input ref={this.amountRef} />
         <button onClick={this.handleClick}>+</button>
       </div>
