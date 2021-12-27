@@ -12,6 +12,16 @@ function render(vdom, container) {
 	}
 }
 
+export function useReducer(reducer, initialState) {
+	hookStates[hookIndex] = hookStates[hookIndex] || initialState
+	const currentIndex = hookIndex
+	function dispatch(action) {
+		hookStates[currentIndex] = action ? reducer(hookStates[currentIndex], action) : action
+		scheduleUpdate()
+	}
+	return [hookStates[hookIndex++], dispatch]
+}
+
 export function useMemo(factory, deps) {
 	if (hookStates[hookIndex]) {
 		const [oldMemo, oldDeps] = hookStates[hookIndex]
