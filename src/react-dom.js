@@ -43,10 +43,17 @@ export function useReducer(reducer, initialState) {
 	hookStates[hookIndex] = hookStates[hookIndex] || initialState
 	const currentIndex = hookIndex
 	function dispatch(action) {
-		// 判断传递进来的是不是函数，如果是函数则执行它返回新状态
-		const newState = typeof action === 'function' ? action(hookStates[currentIndex]) : hookStates[currentIndex]
-		// 判断 reducer 是否有值，如果有值则执行它返回新状态，如果没有就直接赋值 
-		hookStates[currentIndex] = reducer ? reducer(newState, action) : newState
+		// 获取老状态
+		const oldState = hookStates[currentIndex]
+		// 如果有 reducer 就用 reducer 计算新状态
+		if (reducer) {
+			const newState = reducer(oldState, action)
+			hookStates[currentIndex] = newState
+		} else {
+			// 判断 action 是不是函数，如果是传入老状态，计算新状态
+			const newState = typeof action === 'function' ? action(oldState) : action
+			hookStates[currentIndex] = newState
+		}
 		scheduleUpdate()
 	}
 	return [hookStates[hookIndex++], dispatch]
