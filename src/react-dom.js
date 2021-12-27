@@ -12,12 +12,41 @@ function render(vdom, container) {
 	}
 }
 
+export function useEffect(callback, deps = []) {
+	const currentIndex = hookIndex
+	if (hookStates[hookIndex]) {
+		const [lastDestroy, oldDeps] = hookStates[hookIndex]
+		const same = deps && deps.every((dep, index) => dep === oldDeps[index])
+		if (same) {
+			hookIndex++
+		} else {
+			const timer = setTimeout(() => {
+				lastDestroy && lastDestroy()
+				const destroy = callback()
+				hookStates[currentIndex] = [destroy, deps]
+				clearTimeout(timer)
+			})
+			hookIndex++
+		}
+	} else {
+		// 开启一个新的宏任务
+		const timer = setTimeout(() => {
+			const destroy = callback()
+			hookStates[currentIndex] = [destroy, deps]
+			clearTimeout(timer)
+		})
+		hookIndex++
+	}
+}
+
 export function useReducer(reducer, initialState) {
 	hookStates[hookIndex] = hookStates[hookIndex] || initialState
 	const currentIndex = hookIndex
 	function dispatch(action) {
-		const newState = typeof action === 'function' ? action(hookStates[currentIndex]) : action
-		hookStates[currentIndex] = reducer ? reducer(newState, action) : action
+		// 判断传递进来的是不是函数，如果是函数则执行它返回新状态
+		const newState = typeof action === 'function' ? action(hookStates[currentIndex]) : hookStates[currentIndex]
+		// 判断 reducer 是否有值，如果有值则执行它返回新状态，如果没有就直接赋值 
+		hookStates[currentIndex] = reducer ? reducer(newState, action) : newState
 		scheduleUpdate()
 	}
 	return [hookStates[hookIndex++], dispatch]
@@ -26,7 +55,7 @@ export function useReducer(reducer, initialState) {
 export function useMemo(factory, deps) {
 	if (hookStates[hookIndex]) {
 		const [oldMemo, oldDeps] = hookStates[hookIndex]
-		const same = deps.every((dep, index) => dep === oldDeps[index])
+		const same = deps && deps.every((dep, index) => dep === oldDeps[index])
 		if (same) {
 			hookIndex++
 			return oldMemo
@@ -40,7 +69,7 @@ export function useMemo(factory, deps) {
 export function useCallback(callback, deps) {
 	if (hookStates[hookIndex]) {
 		const [oldCallback, oldDeps] = hookStates[hookIndex]
-		const same = deps.every((dep, index) => dep === oldDeps[index])
+		const same = deps && deps.every((dep, index) => dep === oldDeps[index])
 		if (same) {
 			hookIndex++
 			return oldCallback
@@ -51,7 +80,7 @@ export function useCallback(callback, deps) {
 }
 
 export function useState(initialState) {
-	useReducer(null, initialState)
+	return useReducer(null, initialState)
 }
 
 /**
