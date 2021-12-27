@@ -16,7 +16,8 @@ export function useReducer(reducer, initialState) {
 	hookStates[hookIndex] = hookStates[hookIndex] || initialState
 	const currentIndex = hookIndex
 	function dispatch(action) {
-		hookStates[currentIndex] = reducer(hookStates[currentIndex], action)
+		const newState = typeof action === 'function' ? action(hookStates[currentIndex]) : action
+		hookStates[currentIndex] = reducer ? reducer(newState, action) : action
 		scheduleUpdate()
 	}
 	return [hookStates[hookIndex++], dispatch]
@@ -50,13 +51,7 @@ export function useCallback(callback, deps) {
 }
 
 export function useState(initialState) {
-	hookStates[hookIndex] = hookStates[hookIndex] || initialState
-	const currentIndex = hookIndex
-	function setState(newState) {
-		hookStates[currentIndex] = newState
-		scheduleUpdate()
-	}
-	return [hookStates[hookIndex++], setState]
+	useReducer(null, initialState)
 }
 
 /**
