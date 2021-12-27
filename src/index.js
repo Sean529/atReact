@@ -3,24 +3,20 @@
 import React from "./react"
 import ReactDOM from "./react-dom"
 
-function Counter() {
-  const [number, setNumber] = React.useState(0)
-  // 此函数会在组件和DOM渲染之后执行,可以执行一些副作用的代码
-  React.useEffect(() => {
-    console.log('开启定时器');
-    const timer = setInterval(() => {
-      setNumber(number => number + 1)
-    }, 1000)
-    // 返回一个函数，会在下次执行 useEffect 回调之前执行
-    return () => {
-      clearInterval(timer)
-    }
-  }, [])
+function Animation() {
+  const ref = React.useRef()
+  const style = {
+    width: '100px',
+    height: '100px',
+    borderRadius: '50%',
+    backgroundColor: 'red'
+  }
+  React.useLayoutEffect(() => {
+    ref.current.style.transform = 'translate(500px)'
+    ref.current.style.transition = 'all 500ms'
+  })
   return (
-    <div>
-      {number}
-    </div >
+    <div style={style} ref={ref} ></div>
   )
 }
-
-ReactDOM.render(<Counter />, document.getElementById("root"))
+ReactDOM.render(<Animation />, document.getElementById("root"))

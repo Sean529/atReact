@@ -39,6 +39,35 @@ export function useEffect(callback, deps = []) {
 	}
 }
 
+export function useRef(initialState = null) {
+	return hookStates[hookIndex++] || { current: initialState }
+}
+
+export function useLayoutEffect(callback, deps = []) {
+	const currentIndex = hookIndex
+	if (hookStates[hookIndex]) {
+		const [lastDestroy, oldDeps] = hookStates[hookIndex]
+		const same = deps && deps.every((dep, index) => dep === oldDeps[index])
+		if (same) {
+			hookIndex++
+		} else {
+			queueMicrotask(() => {
+				lastDestroy && lastDestroy()
+				const destroy = callback()
+				hookStates[currentIndex] = [destroy, deps]
+			})
+			hookIndex++
+		}
+	} else {
+		// 开启一个新的宏任务
+		queueMicrotask(() => {
+			const destroy = callback()
+			hookStates[currentIndex] = [destroy, deps]
+		})
+		hookIndex++
+	}
+}
+
 export function useReducer(reducer, initialState) {
 	hookStates[hookIndex] = hookStates[hookIndex] || initialState
 	const currentIndex = hookIndex
