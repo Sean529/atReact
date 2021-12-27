@@ -12,6 +12,33 @@ function render(vdom, container) {
 	}
 }
 
+export function useMemo(factory, deps) {
+	if (hookStates[hookIndex]) {
+		const [oldMemo, oldDeps] = hookStates[hookIndex]
+		const same = deps.every((dep, index) => dep === oldDeps[index])
+		if (same) {
+			hookIndex++
+			return oldMemo
+		}
+	}
+	const newMemo = factory()
+	hookStates[hookIndex++] = [newMemo, deps]
+	return newMemo
+}
+
+export function useCallback(callback, deps) {
+	if (hookStates[hookIndex]) {
+		const [oldCallback, oldDeps] = hookStates[hookIndex]
+		const same = deps.every((dep, index) => dep === oldDeps[index])
+		if (same) {
+			hookIndex++
+			return oldCallback
+		}
+	}
+	hookStates[hookIndex++] = [callback, deps]
+	return callback
+}
+
 export function useState(initialState) {
 	hookStates[hookIndex] = hookStates[hookIndex] || initialState
 	const currentIndex = hookIndex

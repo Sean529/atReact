@@ -1,7 +1,7 @@
 import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from "./constant"
 import { wrapToVdom, shallowEqual } from "./utils"
 import { Component, PureComponent } from "./Component"
-import { useState } from './react-dom'
+import { useState, useMemo, useCallback } from './react-dom'
 
 /**
  * 用来创建 React 元素的工厂方法
@@ -111,6 +111,8 @@ const React = {
   PureComponent,
   memo,
   useState,
+  useMemo,
+  useCallback
 }
 
 export default React
