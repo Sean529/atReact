@@ -3,20 +3,34 @@
 import React from "./react"
 import ReactDOM from "./react-dom"
 
-function Animation() {
-  const ref = React.useRef()
-  const style = {
-    width: '100px',
-    height: '100px',
-    borderRadius: '50%',
-    backgroundColor: 'red'
-  }
-  React.useLayoutEffect(() => {
-    ref.current.style.transform = 'translate(500px)'
-    ref.current.style.transition = 'all 500ms'
+function Child(props, forwardRef) {
+  const inputRef = React.useRef()
+  React.useImperativeHandle(forwardRef, () => {
+    return {
+      focus() {
+        inputRef.current.focus()
+      }
+    }
   })
+  return <input ref={inputRef} />
+}
+
+const ForwardedChild = React.forwardRef(Child)
+
+function Parent() {
+  const [number, setNumber] = React.useState(0)
+  const inputRef = React.useRef()
+  const getFocus = () => {
+    inputRef.current.focus()
+    // inputRef.current.remove()
+  }
   return (
-    <div style={style} ref={ref} ></div>
+    <div>
+      <ForwardedChild ref={inputRef} />
+      <button onClick={getFocus}>获得焦点</button>
+      <p>{number}</p>
+      <button onClick={() => setNumber(number + 1)}>+</button>
+    </div>
   )
 }
-ReactDOM.render(<Animation />, document.getElementById("root"))
+ReactDOM.render(<Parent />, document.getElementById("root"))
