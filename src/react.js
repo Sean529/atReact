@@ -61,7 +61,7 @@ const Children = {
 }
 
 function createContext() {
-  const context = { $$typeof: REACT_CONTEXT, }
+  const context = { $$typeof: REACT_CONTEXT, _currentValue: null }
   context.Provider = {
     $$typeof: REACT_PROVIDER,
     _context: context
@@ -100,6 +100,10 @@ function memo(type, compare = shallowEqual) {
   }
 }
 
+function useContext(context) {
+  return context._currentValue
+}
+
 const React = {
   createRef,
   createElement,
@@ -114,6 +118,7 @@ const React = {
   useMemo,
   useCallback,
   useReducer,
+  useContext,
 }
 
 export default React

@@ -3,6 +3,8 @@
 import React from "./react"
 import ReactDOM from "./react-dom"
 
+const CounterContext = React.createContext()
+
 function reducer(state = { number: 0 }, action) {
   switch (action.type) {
     case 'ADD':
@@ -15,14 +17,23 @@ function reducer(state = { number: 0 }, action) {
 }
 
 function Counter() {
-  const [state, dispatch] = React.useReducer(reducer, { number: 0 })
+  const { state, dispatch } = React.useContext(CounterContext)
   return (
     <div>
       <p>{state.number}</p>
-      <button onClick={() => dispatch()}>+</button>
+      <button onClick={() => dispatch({ type: 'ADD' })}>+</button>
       <button onClick={() => dispatch({ type: 'MINUS' })}>-</button>
     </div >
   )
 }
 
-ReactDOM.render(<Counter />, document.getElementById("root"))
+function App() {
+  const [state, dispatch] = React.useReducer(reducer, { number: 0 })
+  return (
+    <CounterContext.Provider value={{ state, dispatch }}>
+      <Counter />
+    </CounterContext.Provider>
+  )
+}
+
+ReactDOM.render(<App />, document.getElementById("root"))
