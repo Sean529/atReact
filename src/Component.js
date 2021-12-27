@@ -1,4 +1,5 @@
 import { findDOM, compareTwoVdom } from './react-dom'
+import { shallowEqual } from './utils'
 
 // 更新队列
 export const updateQuery = {
@@ -122,5 +123,11 @@ export class Component {
 		if (this.componentDidUpdate) {
 			this.componentDidUpdate(this.props, this.state, snapshot)
 		}
+	}
+}
+
+export class PureComponent extends Component {
+	shouldComponentUpdate(newProps, nextState) {
+		return !shallowEqual(this.props, newProps) || !shallowEqual(this.state, nextState)
 	}
 }

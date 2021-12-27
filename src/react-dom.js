@@ -286,8 +286,8 @@ function updateFunctionComponent(oldVdom, newVdom) {
 }
 
 function updateChildren(parentDOM, oldVChildren, newVChildren) {
-	oldVChildren = (Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren])
-	newVChildren = (Array.isArray(newVChildren) ? newVChildren : [newVChildren])
+	oldVChildren = (Array.isArray(oldVChildren) ? oldVChildren : [oldVChildren]).filter(item => item)
+	newVChildren = (Array.isArray(newVChildren) ? newVChildren : [newVChildren]).filter(item => item)
 
 	// 把老节点存放入到一个以key为属性，以节点为值的对象中
 	const keyedOldMap = {}

@@ -1,35 +1,41 @@
-import React from "react"
-import ReactDOM from "react-dom"
-// import React from "./react"
-// import ReactDOM from "./react-dom"
+// import React from "react"
+// import ReactDOM from "react-dom"
+import React from "./react"
+import ReactDOM from "./react-dom"
 
-function withTracker(OldComponent) {
-  return class extends React.Component {
-    constructor(props) {
-      super(props)
-      this.state = { x: 0, y: 0 }
-    }
-
-    handleMouseMove = (event) => {
-      this.setState({ x: event.clientX, y: event.clientY })
-    }
-
-    render() {
-      return (<div onMouseMove={this.handleMouseMove} style={{ border: '1px solid red' }}>
-        <OldComponent {...this.state} />
-      </div>)
-    }
+class ClassCounter extends React.PureComponent {
+  render() {
+    console.log('ClassCounter render');
+    return <div>ClassCounter: {this.props.counter}</div>
   }
 }
 
-function show(props) {
-  return (
-    <div>
-      <h1>移动鼠标</h1>
-      <p>当前鼠标位置 {props.x},{props.y}</p>
-    </div>
-  )
+function FunctionCounter(props) {
+  console.log('FunctionCounter render');
+  return <div>FunctionCounter: {props.counter}</div>
 }
 
-const ShowWithTracker = withTracker(show)
-ReactDOM.render(<ShowWithTracker />, document.getElementById("root"))
+class App extends React.Component {
+  constructor() {
+    super()
+    this.state = { number: 0 }
+    this.amountRef = React.createRef()
+  }
+  handleClick = () => {
+    const number = this.state.number + parseInt(this.amountRef.current.value)
+    this.setState({ number })
+  }
+  render() {
+    return (
+      <div>
+        <p>{this.state.number}</p>
+        <ClassCounter counter={this.state.number} />
+        <FunctionCounter counter={this.state.number} />
+        <input ref={this.amountRef} />
+        <button onClick={this.handleClick}>+</button>
+      </div>
+    )
+  }
+}
+
+ReactDOM.render(<App />, document.getElementById("root"))

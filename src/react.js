@@ -1,6 +1,6 @@
 import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER } from "./constant"
 import { wrapToVdom } from "./utils"
-import { Component } from "./Component"
+import { Component, PureComponent } from "./Component"
 
 /**
  * 用来创建 React 元素的工厂方法
@@ -99,6 +99,7 @@ const React = {
   Children,
   createContext,
   cloneElement,
+  PureComponent,
 }
 
 export default React
