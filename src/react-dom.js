@@ -16,7 +16,7 @@ export function useReducer(reducer, initialState) {
 	hookStates[hookIndex] = hookStates[hookIndex] || initialState
 	const currentIndex = hookIndex
 	function dispatch(action) {
-		hookStates[currentIndex] = action ? reducer(hookStates[currentIndex], action) : action
+		hookStates[currentIndex] = reducer(hookStates[currentIndex], action)
 		scheduleUpdate()
 	}
 	return [hookStates[hookIndex++], dispatch]

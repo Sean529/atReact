@@ -19,7 +19,7 @@ function Counter() {
   return (
     <div>
       <p>{state.number}</p>
-      <button onClick={() => dispatch({ type: 'ADD' })}>+</button>
+      <button onClick={() => dispatch()}>+</button>
       <button onClick={() => dispatch({ type: 'MINUS' })}>-</button>
     </div >
   )
