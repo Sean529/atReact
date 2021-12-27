@@ -1,8 +1,25 @@
 import { REACT_TEXT, REACT_FORWARD_REF, PLACEMENT, MOVE, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from './constant'
 import { addEvent } from './event'
 
+let hookStates = []
+let hookIndex = 0
+let scheduleUpdate
 function render(vdom, container) {
 	mount(vdom, container)
+	scheduleUpdate = () => {
+		hookIndex = 0
+		compareTwoVdom(container, vdom, vdom)
+	}
+}
+
+export function useState(initialState) {
+	hookStates[hookIndex] = hookStates[hookIndex] || initialState
+	const currentIndex = hookIndex
+	function setState(newState) {
+		hookStates[currentIndex] = newState
+		scheduleUpdate()
+	}
+	return [hookStates[hookIndex++], setState]
 }
 
 /**
