@@ -3,87 +3,33 @@ import ReactDOM from "react-dom"
 // import React from "./react"
 // import ReactDOM from "./react-dom"
 
-// 1.属性代理
-// const withLoading = message => OldComponent => {
-//   return class extends React.Component {
-//     render() {
-//       const state = {
-//         show() {
-//           let div = document.createElement('div');
-//           div.id = 'loadingDiv'
-//           div.innerHTML = `<p style="position:absolute;top:100px;z-index:10;background-color:black;color:pink;">${message}</p>`;
-//           document.body.appendChild(div);
-//         },
-//         hide() {
-//           document.getElementById('loadingDiv').remove()
-//         }
-//       }
-//       return (
-//         <OldComponent {...this.props} {...state} />
-//       )
-//     }
-//   }
-// }
-
-// // @withLoading('加载中...')
-// class App extends React.Component {
-//   render() {
-//     return (
-//       <div>
-//         <p>App</p>
-//         <button onClick={this.props.show}>show</button>
-//         <button onClick={this.props.hide}>hide</button>
-//       </div>
-//     )
-
-//   }
-// }
-
-// const WithLoadingApp = withLoading('加载中...')(App)
-
-// const element = <WithLoadingApp />
-
-// 2.反向继承
-class Button extends React.Component {
-  state = { name: '按钮' }
-  componentWillMount() {
-    console.log('Button componentWillMount');
-  }
-  componentDidMount() {
-    console.log('Button componentDidMount');
-  }
-  render() {
-    console.log('Button render');
-    return <button name={this.state.name} title={this.props.title} />
-  }
-}
-
-const enhancer = OldComponent => {
-  return class extends OldComponent {
-    state = { number: 0 }
-    componentWillMount() {
-      console.log('enhancer componentWillMount');
-      super.componentWillMount()
+function withTracker(OldComponent) {
+  return class extends React.Component {
+    constructor(props) {
+      super(props)
+      this.state = { x: 0, y: 0 }
     }
-    componentDidMount() {
-      console.log('enhancer componentDidMount');
-      super.componentDidMount()
+
+    handleMouseMove = (event) => {
+      this.setState({ x: event.clientX, y: event.clientY })
     }
-    handleClick = () => {
-      this.setState({ number: this.state.number + 1 })
-    }
+
     render() {
-      console.log('enhancer render');
-      const renderElement = super.render()
-      const newProps = {
-        ...renderElement.props,
-        ...this.state,
-        onClick: this.handleClick
-      }
-      return React.cloneElement(renderElement, newProps, this.state.number)
+      return (<div onMouseMove={this.handleMouseMove} style={{ border: '1px solid red' }}>
+        <OldComponent {...this.state} />
+      </div>)
     }
   }
 }
 
-const EnhanceButton = enhancer(Button)
-ReactDOM.render(<EnhanceButton title="标题" />, document.getElementById("root"))
+function show(props) {
+  return (
+    <div>
+      <h1>移动鼠标</h1>
+      <p>当前鼠标位置 {props.x},{props.y}</p>
+    </div>
+  )
+}
+
+const ShowWithTracker = withTracker(show)
+ReactDOM.render(<ShowWithTracker />, document.getElementById("root"))
