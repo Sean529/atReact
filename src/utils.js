@@ -5,7 +5,7 @@ import { REACT_TEXT } from './constant'
  * @param {*} element 元素
  * @returns 包装后的元素
  */
-export function warpToVdom(element) {
+export function wrapToVdom(element) {
 	return typeof element === 'string' || typeof element === 'number' ? {
 		type: REACT_TEXT,
 		props: element

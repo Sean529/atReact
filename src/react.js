@@ -1,5 +1,5 @@
 import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER } from "./constant"
-import { warpToVdom } from "./utils"
+import { wrapToVdom } from "./utils"
 import { Component } from "./Component"
 
 /**
@@ -24,9 +24,9 @@ function createElement(type, config, children) {
   props.children = arguments.length > 3 ? Array.prototype.slice.call(arguments, 2) : children
 
   if (arguments.length > 3) {
-    props.children = Array.prototype.slice.call(arguments, 2).map(warpToVdom)
+    props.children = Array.prototype.slice.call(arguments, 2).map(wrapToVdom)
   } else {
-    props.children = warpToVdom(children)
+    props.children = wrapToVdom(children)
   }
 
   return {
@@ -59,7 +59,7 @@ const Children = {
   },
 }
 
-function createContext () {
+function createContext() {
   const context = { $$typeof: REACT_CONTEXT, }
   context.Provider = {
     $$typeof: REACT_PROVIDER,
@@ -72,6 +72,25 @@ function createContext () {
   return context
 }
 
+function cloneElement(element, newProps, ...newChildren) {
+  let oldChildren = element.props && element.props.children
+  oldChildren = (Array.isArray(oldChildren) ? oldChildren : [oldChildren]).filter(item => typeof item !== 'undefined').map(wrapToVdom)
+  newChildren = newChildren.filter(item => typeof item !== 'undefined').map(wrapToVdom)
+  let children = [...oldChildren, ...newChildren]
+  const props = { ...element.props, ...newProps, children }
+  if (newChildren.length > 0) {
+    props.children = newChildren
+  } else {
+    props.children = oldChildren
+  }
+  if (children.length === 0) {
+    children = undefined
+  } else if (children.length === 1) {
+    children = children[0]
+  }
+  return { ...element, props }
+}
+
 const React = {
   createRef,
   createElement,
@@ -79,6 +98,7 @@ const React = {
   forwardRef,
   Children,
   createContext,
+  cloneElement,
 }
 
 export default React
