@@ -1,4 +1,4 @@
-import { REACT_TEXT } from './constant'
+import { REACT_TEXT } from './ReactSymbols'
 
 /**
  * 把文本数字节点变为虚拟DOM节点
@@ -7,7 +7,7 @@ import { REACT_TEXT } from './constant'
  */
 export function wrapToVdom(element) {
 	return typeof element === 'string' || typeof element === 'number' ? {
-		type: REACT_TEXT,
+		$$typeof: REACT_TEXT,
 		props: element
 	} : element
 }

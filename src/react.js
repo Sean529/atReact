@@ -1,4 +1,4 @@
-import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from "./constant"
+import { REACT_ELEMENT, REACT_FORWARD_REF, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO, REACT_FRAGMENT } from './ReactSymbols'
 import { wrapToVdom, shallowEqual } from "./utils"
 import { Component, PureComponent } from "./Component"
 import { useState, useMemo, useCallback, useReducer, useEffect, useLayoutEffect, useRef } from './react-dom'
@@ -127,6 +127,7 @@ const React = {
   useRef,
   useLayoutEffect,
   useImperativeHandle,
+  Fragment: REACT_FRAGMENT,
 }
 
 export default React

@@ -1,4 +1,12 @@
-import { REACT_TEXT, REACT_FORWARD_REF, PLACEMENT, MOVE, REACT_CONTEXT, REACT_PROVIDER, REACT_MEMO } from './constant'
+import { PLACEMENT, MOVE, } from './ReactFlags'
+import {
+	REACT_TEXT,
+	REACT_FORWARD_REF,
+	REACT_CONTEXT,
+	REACT_PROVIDER,
+	REACT_MEMO,
+	REACT_FRAGMENT,
+} from './ReactSymbols'
 import { addEvent } from './event'
 
 let hookStates = []
@@ -141,9 +149,11 @@ function mount(vdom, container) {
  * @returns 真实dom
  */
 function createDOM(vdom) {
-	const { type, props, ref } = vdom
+	const { type, props, ref, $$typeof } = vdom
 	let dom
-	if (type && type.$$typeof === REACT_MEMO) {
+	if (type && type === REACT_FRAGMENT) {
+		dom = document.createDocumentFragment(props)
+	} else if (type && type.$$typeof === REACT_MEMO) {
 		return mountMemoComponent(vdom)
 	} else if (type && type.$$typeof === REACT_FORWARD_REF) {
 		return mountForwardComponent(vdom)
@@ -151,7 +161,7 @@ function createDOM(vdom) {
 		return mountProviderComponent(vdom)
 	} else if (type && type.$$typeof === REACT_CONTEXT) { // Consumer
 		return mountContextComponent(vdom)
-	} else if (type === REACT_TEXT) {
+	} else if ($$typeof && $$typeof === REACT_TEXT) {
 		dom = document.createTextNode(props)
 	} else if (typeof type === 'function') {
 		if (type.isReactClassComponent) {
@@ -166,11 +176,11 @@ function createDOM(vdom) {
 	if (props) {
 		updateProps(dom, null, props)
 		const { children } = props
-		if (typeof children === 'object' && children.type) {
+		if (Array.isArray(children)) {
+			reconcileChildren(children, dom)
+		} else if (typeof children === 'object' && $$typeof) {
 			children.mountIndex = 0
 			mount(children, dom)
-		} else if (Array.isArray(children)) {
-			reconcileChildren(children, dom)
 		}
 	}
 
@@ -351,7 +361,7 @@ function updateElement(oldVdom, newVdom) {
 		updateContextComponent(oldVdom, newVdom)
 	} else if (oldVdom.type.$$typeof === REACT_PROVIDER) {
 		updateProviderComponent(oldVdom, newVdom)
-	} else if (oldVdom.type === REACT_TEXT) {
+	} else if (oldVdom.type.$$typeof === REACT_TEXT) {
 		// 如果是文本节点
 		const currentDOM = newVdom.dom = findDOM(oldVdom)
 		if (oldVdom.props !== newVdom.props) {
